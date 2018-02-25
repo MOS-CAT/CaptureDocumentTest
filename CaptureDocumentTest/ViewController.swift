@@ -27,6 +27,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		session.addInput(input)
 		return session
 	}()
+	private let visionSequenceHandler = VNSequenceRequestHandler()
+	private var lastObservation: VNDetectedObjectObservation?
+	
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -43,6 +46,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		self.captureSession.startRunning()
 	}
 	
+	
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
 		
@@ -58,8 +62,29 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 	
 	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate
 	
-	func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+	
+	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+		guard
+			// get the CVPixelBuffer out of the CMSampleBuffer
+			let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
+			// make sure that there is a previous observation we can feed into the request
+			let lastObservation = self.lastObservation
+		else {
+			return
+		}
 		
+		// create the request
+		let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: nil)
+		// set the accuracy to high
+		// this is slower, but it works a lot better
+		request.trackingLevel = .accurate
+		
+		// perform the request
+		do {
+			try self.visionSequenceHandler.perform([request], on: pixelBuffer)
+		} catch {
+			print("Throws: \(error)")
+		}
 	}
 
 }
