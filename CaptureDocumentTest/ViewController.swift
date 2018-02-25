@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
 	
 	// cameraView
 	@IBOutlet private weak var cameraView: UIView!
@@ -34,6 +34,11 @@ class ViewController: UIViewController {
 		// make the camera appear on the screen
 		self.cameraView.layer.addSublayer(self.cameraLayer)
 		
+		// register to receive buffers from the camera
+		let videoOutput = AVCaptureVideoDataOutput()
+		videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "MyQueue"))
+		self.captureSession.addOutput(videoOutput)
+		
 		// begin the session
 		self.captureSession.startRunning()
 	}
@@ -50,6 +55,12 @@ class ViewController: UIViewController {
 		// Dispose of any resources that can be recreated.
 	}
 
+	
+	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate
+	
+	func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+		
+	}
 
 }
 
