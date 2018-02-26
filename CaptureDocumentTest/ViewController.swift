@@ -44,7 +44,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		super.viewDidLoad()
 		
 		// make the camera appear on the screen
-		self.cameraView.layer.addSublayer(self.cameraLayer)
+//		self.cameraView.layer.addSublayer(self.cameraLayer)
+		self.cameraView.layer.insertSublayer(self.cameraLayer, at: 0)
 		
 		// register to receive buffers from the camera
 		let videoOutput = AVCaptureVideoDataOutput()
@@ -87,6 +88,33 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		self.lastObservation = newObservation
 	}
 	
+	
+	private func handleVisionRequestUpdate(_ request: VNRequest, error: Error?) {
+		// Dispatch to the main queue because we are touching non-atomic, non-thread safe properties of the view controller
+		DispatchQueue.main.async {
+			// make sure we have an actual result
+			guard let newObservation = request.results?.first as? VNDetectedObjectObservation else { return }
+			
+			// prepare for next loop
+			self.lastObservation = newObservation
+			
+			// check the confidence level before updating the UI
+			print("confidence: \(newObservation.confidence)")
+			guard newObservation.confidence >= 0.5 else {
+				// hide the rectangle when we lose accuracy so the user knows something is wrong
+				self.highlightView?.frame = .zero
+				return
+			}
+			
+			// calclate view rect
+			var transformedRect = newObservation.boundingBox
+			transformedRect.origin.y = 1 - transformedRect.origin.y
+			let convertedRect = self.cameraLayer.layerRectConverted(fromMetadataOutputRect: transformedRect)
+			
+			// move the highlight view
+			self.highlightView?.frame = convertedRect
+		}
+	}
 
 	
 	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate
@@ -103,7 +131,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		}
 		
 		// create the request
-		let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: nil)
+		let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: self.handleVisionRequestUpdate)
 		// set the accuracy to high
 		// this is slower, but it works a lot better
 		request.trackingLevel = .accurate
