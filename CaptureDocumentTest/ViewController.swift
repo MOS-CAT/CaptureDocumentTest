@@ -15,6 +15,15 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 	// cameraView
 	@IBOutlet private weak var cameraView: UIView!
 	
+	// highlightView
+	@IBOutlet private weak var highlightView: UIView? {
+		didSet {
+			self.highlightView?.layer.borderColor = UIColor.red.cgColor
+			self.highlightView?.layer.borderWidth = 4
+			self.highlightView?.backgroundColor = .clear
+		}
+	}
+	
 	private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
 	private lazy var captureSession: AVCaptureSession = {
 		let session = AVCaptureSession()
@@ -58,6 +67,26 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
 	}
+	
+	
+	// MARK: method
+	
+	
+	@IBAction func userTapped(_ sender: UITapGestureRecognizer) {
+		// get the center of the tap
+		self.highlightView?.frame.size = CGSize(width: 120, height: 120)
+		self.highlightView?.center = sender.location(in: self.view)
+		
+		// convert the rect for the initial observation
+		let originalRect = self.highlightView?.frame ?? .zero
+		var convertedRect = self.cameraLayer.metadataOutputRectConverted(fromLayerRect: originalRect)
+		convertedRect.origin.y = 1 - convertedRect.origin.y
+		
+		// set the observation
+		let newObservation = VNDetectedObjectObservation(boundingBox: convertedRect)
+		self.lastObservation = newObservation
+	}
+	
 
 	
 	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate

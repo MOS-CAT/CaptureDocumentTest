@@ -20,7 +20,15 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sIN-0u-ViL">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O5O-oH-cAb">
+                                        <rect key="frame" x="34" y="58" width="240" height="128"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </view>
+                                </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <gestureRecognizers/>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -31,12 +39,21 @@
                             <constraint firstItem="sIN-0u-ViL" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="nga-3T-3LH"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="b7J-vP-6Qk" appends="YES" id="FEf-0Q-hLc"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="cameraView" destination="sIN-0u-ViL" id="R6Y-kL-ebD"/>
+                        <outlet property="highlightView" destination="O5O-oH-cAb" id="ak2-i6-SWE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="b7J-vP-6Qk">
+                    <connections>
+                        <action selector="userTapped:" destination="BYZ-38-t0r" id="PAj-Ci-3OA"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-287.19999999999999" y="107.49625187406298"/>
         </scene>
